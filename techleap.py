@@ -1,9 +1,9 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
 import time
 import json
 import pandas as pd
 import os
+from selenium import webdriver
+from selenium.webdriver.common.by import By
 import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
 from dotenv import load_dotenv
@@ -24,9 +24,10 @@ def send_email(acc_count, alumni_count, diff_table):
     # create email vars
     subject = f"Scraper News: {acc_count} Accelerators, {alumni_count} Alumni"
     diff_table = diff_table[["accelerator", "alumni_name", "alumni_year"]]
-    diff_table.columns = ["Accelerator", "Alumni", "Year"]
+    diff_table.columns = ["Accelerator", "Company", "Founded On"]
     html_table = diff_table.to_html(index=False)
-    html_content = f"<html><body><h1>Scraper Update</h1><p>New Accelerators: {acc_count}</p><p>New Alumnis: {alumni_count}</p>{html_table}</body></html>"
+    style_content = "<style>table {border-collapse: collapse; width: 100%; font-size: 14px; margin-bottom: 20px;} table th, table td {padding: 10px; text-align: left; vertical-align: top; border: 1px solid #ccc;} table th { background-color: #f5f5f5;font-weight: bold;} table tr:nth-child(even) td {background-color: #f9f9f9;}</style>"
+    html_content = f"<html><head>{style_content}</head><body><h1>Scraper Update</h1><p>New Accelerators: {acc_count}</p><p>New Alumnis: {alumni_count}</p>{html_table}</body></html>"
     sender = {"name": "Scraper #001", "email": os.getenv("SIB_SENDER")}
     to = [{"email": os.getenv("SIB_RECIPIENT"), "name": "Scraper User"}]
     headers = {"EMAIL_SNATHJR": "snathjr-1234"}
@@ -61,6 +62,8 @@ if os.path.exists("techleap.json"):
         prev_alumnis = json.load(f)
 
 prev_alumnis = pd.DataFrame(prev_alumnis)
+# -------
+
 # let's create a chrome driver
 driver = webdriver.Chrome()
 

@@ -169,7 +169,7 @@ def fetch_alumnis(driver, accelerator):
 # pass headless options
 options = webdriver.ChromeOptions()
 # run chrome in headless mode
-options.headless = False
+options.headless = True
 
 # let's create a chrome driver
 driver = webdriver.Chrome(options=options)

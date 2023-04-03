@@ -152,7 +152,10 @@ def fetch_alumnis(driver, accelerator):
             By.CLASS_NAME, "entity-name__name-text"
         )
         alumni_link = alumni_name.get_attribute("href")
-        alumni_year = table_list_item.find_element(By.TAG_NAME, "time")
+        try:
+            alumni_year = table_list_item.find_element(By.TAG_NAME, "time")
+        except:
+            alumni_year = None
         # append data to alumnis list
         alumnis.append(
             {
@@ -160,7 +163,7 @@ def fetch_alumnis(driver, accelerator):
                 "accelerator_link": acc_link,
                 "alumni_name": alumni_name.text,
                 "alumni_link": alumni_link,
-                "alumni_year": alumni_year.text,
+                "alumni_year": alumni_year.text if alumni_year else None,
             }
         )
     return alumnis
@@ -171,7 +174,7 @@ def fetch_alumnis(driver, accelerator):
 # pass headless options
 options = webdriver.ChromeOptions()
 # run chrome in headless mode
-options.headless = False
+options.headless = True
 
 # let's create a chrome driver
 driver = webdriver.Chrome(options=options)

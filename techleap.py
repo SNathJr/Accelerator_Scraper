@@ -4,6 +4,8 @@ import pandas as pd
 import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
 import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
 from dotenv import load_dotenv
@@ -169,13 +171,14 @@ def fetch_alumnis(driver, accelerator):
 # pass headless options
 options = webdriver.ChromeOptions()
 # run chrome in headless mode
-options.headless = True
+options.headless = False
 
 # let's create a chrome driver
 driver = webdriver.Chrome(options=options)
 
 # this is the url we want to visit
-url = "https://finder.techleap.nl/investors.accelerators"
+# Updated the URL to get all netherlands accelerators
+url = "https://finder.techleap.nl/investors.accelerators/f/locations/anyof_Netherlands"
 
 # let's now open the page we want to visit
 driver.get(url)
@@ -200,18 +203,44 @@ driver.get(url)
 # implicitly wait for a page to load
 time.sleep(5)
 
-# now lets try to find all the accelerators
-accelerators = driver.find_elements(By.CLASS_NAME, "table-list-item")
-
-# this can be treated as our database
+# accelerator dict
+# this is where all the accelerator info will be stored
 database = {}
 
-# lets loop over the accelerators
-for accelerator in accelerators:
-    acc_name = accelerator.find_element(By.CLASS_NAME, "entity-name__name-text")
-    acc_internal_link = acc_name.get_attribute("href")
-    database[acc_name.text] = {"name": acc_name.text, "internal_url": acc_internal_link}
+# Send down key to chain a action on the page
+# Click on a random part of the page so we can press down
+driver.find_element(By.CLASS_NAME, "table-info-bar__left").click()
+# Scroll down the page using ActionChains
+actions = ActionChains(driver)
 
+while True:
+    # press down
+    actions.send_keys(Keys.PAGE_DOWN).perform()
+    # sleep for 2 seconds to let lazy loading work
+    time.sleep(2)
+    # now lets try to find all the accelerators visible on the page
+    accelerators = driver.find_elements(By.CLASS_NAME, "table-list-item")
+    # this flag is used to check if any new accelerator is found
+    found_new = False
+    # lets loop over the accelerators
+    for accelerator in accelerators:
+        acc_name = accelerator.find_element(By.CLASS_NAME, "entity-name__name-text")
+        acc_internal_link = acc_name.get_attribute("href")
+        # if accelerator is not already scraped
+        if acc_name.text not in database:
+            found_new = True
+            database[acc_name.text] = {
+                "name": acc_name.text,
+                "internal_url": acc_internal_link,
+            }
+    # if no new accelerators found break out of the loop
+    if not found_new:
+        break
+# Finally sleeping for 5 seconds
+time.sleep(5)
+
+# log
+print(f"< Found {len(database.values())} accelerators on page.")
 
 # create an empty list to store alumnis
 alumnis = []

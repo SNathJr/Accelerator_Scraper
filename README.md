@@ -47,6 +47,8 @@ And use the following snipped to customize and use your own variables (SIB is Se
 SIB_API_KEY="bfnkjhfjdkjgfdsjhklfgsjklkjldfkljkljdaf"
 SIB_SENDER="example@example.com"
 SIB_RECIPIENT="example@example.com"
+TECHLEAP_USER="example@example.com"
+TECHLEAP_PASS="password"
 ```
 
 ### Run the selenium file
